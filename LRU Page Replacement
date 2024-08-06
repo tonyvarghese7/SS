@@ -1,0 +1,85 @@
+#include <stdio.h>
+
+void LRU(int pages[], int numPages, int numFrames) {
+    int frames[numFrames];
+    int timestamps[numFrames];
+    int pageFaults = 0;
+    int time = 0;
+
+    // Initialize frames and timestamps
+    for (int i = 0; i < numFrames; i++) {
+        frames[i] = -1;
+        timestamps[i] = 0;
+    }
+
+    printf("Page Reference Sequence: ");
+    for (int i = 0; i < numPages; i++) {
+        printf("%d ", pages[i]);
+    }
+    printf("\n\nFrame Status After Each Page Reference:\n");
+
+    // Process each page reference
+    for (int i = 0; i < numPages; i++) {
+        int page = pages[i];
+        int found = 0;
+
+        // Check if the page is already in the frames
+        for (int j = 0; j < numFrames; j++) {
+            if (frames[j] == page) {
+                found = 1;
+                timestamps[j] = time;
+                break;
+            }
+        }
+
+        // If the page is not in the frames (page fault occurs)
+        if (!found) {
+            int oldestIndex = 0;
+
+            // Find the oldest page (least recently used)
+            for (int j = 1; j < numFrames; j++) {
+                if (timestamps[j] < timestamps[oldestIndex]) {
+                    oldestIndex = j;
+                }
+            }
+
+            frames[oldestIndex] = page;
+            timestamps[oldestIndex] = time;
+            pageFaults++;
+
+            // Print the current frame status
+            for (int j = 0; j < numFrames; j++) {
+                if (frames[j] != -1) {
+                    printf("%d ", frames[j]);
+                } else {
+                    printf("- ");
+                }
+            }
+            printf("\n");
+        }
+
+        time++;
+    }
+
+    printf("\nTotal number of page faults: %d\n", pageFaults);
+}
+
+int main() {
+    int numPages, numFrames;
+
+    printf("Enter the number of page references: ");
+    scanf("%d", &numPages);
+
+    int pages[numPages];
+    printf("Enter the page references:\n");
+    for (int i = 0; i < numPages; i++) {
+        scanf("%d", &pages[i]);
+    }
+
+    printf("Enter the number of frames: ");
+    scanf("%d", &numFrames);
+
+    LRU(pages, numPages, numFrames);
+
+    return 0;
+}
